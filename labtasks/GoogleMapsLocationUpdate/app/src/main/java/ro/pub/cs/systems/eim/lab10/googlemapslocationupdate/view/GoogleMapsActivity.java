@@ -4,6 +4,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -277,6 +278,24 @@ public class GoogleMapsActivity extends AppCompatActivity implements GoogleApiCl
         // disable the latitudeEditText, longitudeEditText, navigateToLocationButton widgets
         // the whole routine should be put in a try ... catch block for SecurityExeption
 
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+            locationUpdatesStatus = true;
+            googleMap.setMyLocationEnabled(true);
+            locationUpdatesStatusButton.setText(getResources().getString(R.string.stop_location_updates));
+            locationUpdatesStatusButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.colorGreen, null));
+            if (lastLocation != null) {
+                navigateToLocation(lastLocation);
+            }
+            latitudeEditText.setEnabled(false);
+            longitudeEditText.setEnabled(false);
+            navigateToLocationButton.setEnabled(false);
+        } catch (SecurityException securityException) {
+            Log.e(Constants.TAG, "An exception has occurred: " + securityException.getMessage());
+            if (Constants.DEBUG) {
+                securityException.printStackTrace();
+            }
+        }
     }
 
     private void stopLocationUpdates() {
@@ -289,6 +308,23 @@ public class GoogleMapsActivity extends AppCompatActivity implements GoogleApiCl
         // enable the latitudeEditText, longitudeEditText, navigateToLocationButton widgets	and reset their content
         // the whole routine should be put in a try ... catch block for SecurityExeption
 
+        try {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+            locationUpdatesStatus = false;
+            googleMap.setMyLocationEnabled(false);
+            locationUpdatesStatusButton.setText(getResources().getString(R.string.start_location_updates));
+            locationUpdatesStatusButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.colorRed, null));
+            latitudeEditText.setEnabled(true);
+            longitudeEditText.setEnabled(true);
+            navigateToLocationButton.setEnabled(true);
+            latitudeEditText.setText("");
+            longitudeEditText.setText("");
+        } catch (SecurityException securityException) {
+            Log.e(Constants.TAG, "An exception has occurred: " + securityException.getMessage());
+            if (Constants.DEBUG) {
+                securityException.printStackTrace();
+            }
+        }
     }
 
     @Override
